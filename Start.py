@@ -16,28 +16,25 @@ class server_thread(threading.Thread):
 
 
 class reader_thread(threading.Thread):
-    def __init__(self, IP, port, numberOfAccesses, ID):
+    def __init__(self, IP, numberOfAccesses, ID):
         threading.Thread.__init__(self)
         self.IP = IP
-        self.port = port
         self.numberOfAccesses = numberOfAccesses
         self.ID = ID
     def run(self):
         command = 'python ./Downloads/BulletinBoardSystem/Clientreader.py ' \
-                        + self.IP + ' ' + str(self.port) + ' ' + str(self.numberOfAccesses) + ' ' + str(self.ID)
+                        + self.IP + ' ' + str(self.numberOfAccesses) + ' ' + str(self.ID)
         ssh(command)
-        #run_reader(self.IP, self.port, self.numberOfAccesses, self.ID)
 
 class writer_thread(threading.Thread):
-    def __init__(self, IP, port, numberOfAccesses, ID):
+    def __init__(self, IP, numberOfAccesses, ID):
         threading.Thread.__init__(self)
         self.IP = IP
-        self.port = port
         self.numberOfAccesses = numberOfAccesses
         self.ID = ID
     def run(self):
         command = 'python ./Downloads/BulletinBoardSystem/Clientwriter.py ' \
-                        + self.IP + ' ' + str(self.port) + ' ' + str(self.numberOfAccesses) + ' ' + str(self.ID)
+                        + self.IP + ' ' + str(self.numberOfAccesses) + ' ' + str(self.ID)
         ssh(command)
 
 
@@ -73,7 +70,7 @@ def initiate_log_files():
 
 
 def ssh(command):
-    hostname = '172.20.10.3'
+    hostname = '192.168.1.11'
     port = 22
     username = 'nouran'
     password = '12345'
@@ -81,6 +78,7 @@ def ssh(command):
     shell = spur.SshShell(hostname, username, password, port)
     result = shell.run(command.split(' '))
     print result.output
+    print result.stderr_output
 
 initiate_log_files()
 config = system_config('system.properties')
@@ -90,10 +88,10 @@ serverThread.start()
 sleep(0.1)
 
 for i in range(0, config['numberOfReaders']):
-    reader = reader_thread(config['server'], config['server.port'], config['numberOfAccesses'], str(i))
+    reader = reader_thread(config['server'], config['numberOfAccesses'], str(i))
     reader.start()
 
 for i in range(0, config['numberOfWriters']):
-    writer = writer_thread(config['server'], config['server.port'], config['numberOfAccesses'], str(i + 4))
+    writer = writer_thread(config['server'], config['numberOfAccesses'], str(i + 4))
     writer.start()
 
